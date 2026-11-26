@@ -1,7 +1,105 @@
-<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#515c50"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>Trading Journal</title><style>
-*{box-sizing:border-box}body{margin:0;background:#515c50;color:#ead0a1;font-family:Georgia,serif;background-image:linear-gradient(#515c50d9,#515c50d9),url(texture.jpg);padding-bottom:100px}main{max-width:600px;margin:auto;padding:0 18px}header{text-align:center}header img{width:100%;max-height:160px;object-fit:cover;border-radius:0 0 50% 50%;border-bottom:1px solid #cfb17c}h1{font-weight:normal;letter-spacing:2px;font-size:26px}h2{font-weight:normal} .orn{text-align:center;color:#d9ba83;margin:20px 0}.orn:before,.orn:after{content:'';display:inline-block;width:32%;height:1px;background:#c5a978;vertical-align:middle;margin:0 12px}.panel{border:1px solid #bca77b;border-radius:22px;padding:18px;margin:14px 0;background:#333e3440;box-shadow:0 5px 12px #2228;text-align:center}label{display:block;margin:15px 0 6px}input,textarea,button{font:inherit;font-size:17px;color:#f3dcb1;border:1px solid #bca77b;border-radius:13px;background:#38463a;padding:12px;width:100%}input{text-align:center}textarea{resize:vertical}button{cursor:pointer;background:#d9ba83;color:#354238;font-weight:bold}button.secondary{background:#435044;color:#ead0a1}nav{position:fixed;bottom:0;left:0;right:0;background:#414d42;border-top:1px solid #bca77b;display:flex;padding:10px 5px calc(10px + env(safe-area-inset-bottom));z-index:2}nav button{border:0;background:transparent;color:#ead0a1;font-size:12px;padding:8px 2px;font-weight:normal}nav button.active{background:#687465} .big{font-size:35px;margin:8px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid .panel{margin:5px 0;padding:15px 5px}.pos{color:#d7e6a8}.neg{color:#ffb6a6}.small{font-size:13px;opacity:.85}section[hidden]{display:none}.entry{text-align:left}.entry strong{float:right}svg{width:100%;height:auto} .days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.day{border:1px solid #8a927e;border-radius:6px;min-height:48px;padding:4px 1px;font-size:11px;text-align:center}.day b{display:block;font-size:10px;margin-top:4px} .row{display:flex;gap:8px;align-items:center}.row button{width:auto} #msg{min-height:20px;color:#ffcfad}
-</style><main><header><img src="ornament.jpg" alt="Османский растительный орнамент"><h1>TRADING JOURNAL</h1></header><div class="orn">◇</div><section id="trade"><div class="panel">Баланс до сделки<div class="big" id="balance">—</div><div id="setup"><label for="initial">Стартовый баланс ($)</label><input id="initial" inputmode="decimal" placeholder="5000"><button id="init" style="margin-top:10px">Установить баланс</button></div></div><form id="form"><label for="rr">R/R (1 : X)</label><input id="rr" inputmode="decimal" placeholder="2,9" required><label for="after">Баланс после сделки ($)</label><input id="after" inputmode="decimal" placeholder="0,00" required><div class="grid"><div class="panel">Риск<div class="big" id="riskPct">—</div><div id="risk">—</div></div><div class="panel">Результат<div class="big" id="pnlPct">—</div><div id="pnl">—</div></div></div><label for="note">Заметка о сделке</label><textarea id="note" rows="2" placeholder="Необязательно"></textarea><p id="msg" role="status"></p><button type="submit">Сохранить сделку</button></form><p class="small">Комиссия включена в баланс. Риск оценивается по полному тейку или стопу; при частичном закрытии оценка может быть неточной.</p></section><section id="history" hidden><h2>История сделок</h2><div id="entries"></div></section><section id="calendar" hidden><h2>Календарь доходности</h2><div class="row"><button id="prev">‹</button><span id="month" style="flex:1;text-align:center"></span><button id="next">›</button></div><div class="days" id="days"></div></section><section id="stats" hidden><h2>Статистика</h2><div class="grid" id="metrics"></div><div class="panel"><svg id="chart" viewBox="0 0 320 150" aria-label="График баланса"></svg></div></section><section id="settings" hidden><h2>Настройки</h2><p>Данные сохраняются только в этом браузере. Регулярно делай резервную копию.</p><button id="export">Скачать резервную копию</button><label for="import">Восстановить из файла</label><input type="file" id="import" accept="application/json"><p id="status" role="status"></p><button class="secondary" id="reset">Удалить все данные</button></section></main><nav><button data-tab="trade" class="active">Сделка</button><button data-tab="history">История</button><button data-tab="calendar">Календарь</button><button data-tab="stats">Статистика</button><button data-tab="settings">Настройки</button></nav><script>
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#596154"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><title>Trading Journal</title><style>
+:root{
+  --bg:#596154;
+  --bg-deep:#4a5347;
+  --bg-panel:#556053d4;
+  --bg-panel-2:#4d574be6;
+  --field:#445245e8;
+  --field-hi:#516050;
+  --gold:#d8c198;
+  --gold-deep:#ae9468;
+  --gold-soft:#efdcbc;
+  --shadow:rgba(26,30,24,.42);
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0;
+  color:var(--gold);
+  font-family:Georgia,serif;
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,.075), transparent 28%),
+    radial-gradient(circle at 82% 32%, rgba(255,255,255,.04), transparent 22%),
+    radial-gradient(circle at 34% 72%, rgba(255,255,255,.028), transparent 26%),
+    radial-gradient(circle at 74% 86%, rgba(0,0,0,.08), transparent 25%),
+    linear-gradient(rgba(89,97,84,.90), rgba(89,97,84,.92)),
+    url(texture.jpg);
+  background-size:auto,auto,auto,auto,auto,540px 540px;
+  background-attachment:fixed,fixed,fixed,fixed,fixed,fixed;
+  padding-bottom:100px;
+}
+main{max-width:600px;margin:auto;padding:0 18px 24px}
+header{text-align:center;padding-top:10px}
+header img{
+  width:100%;max-height:138px;object-fit:cover;
+  border-radius:0 0 50% 50%;
+  border-bottom:1px solid rgba(216,193,152,.8);
+  box-shadow:0 10px 28px rgba(23,25,20,.18);
+}
+h1{
+  font-weight:normal;letter-spacing:2.2px;font-size:28px;
+  color:var(--gold-soft);
+  text-shadow:0 1px 0 rgba(255,245,224,.16), 0 2px 4px rgba(0,0,0,.25);
+  margin:18px 0 6px;
+}
+h2{font-weight:normal;color:var(--gold-soft);margin:12px 0 14px}
+.orn{text-align:center;color:var(--gold);margin:14px 0 20px;opacity:.95}
+.orn:before,.orn:after{content:'';display:inline-block;width:32%;height:1px;background:linear-gradient(90deg,transparent,var(--gold-deep),transparent);vertical-align:middle;margin:0 12px}
+.panel{
+  border:1px solid rgba(214,190,149,.82);
+  border-radius:24px;
+  padding:18px;margin:14px 0;
+  background:
+    linear-gradient(180deg, rgba(102,112,96,.18), rgba(57,64,53,.10)),
+    var(--bg-panel);
+  box-shadow:
+    inset 0 1px 0 rgba(255,244,224,.07),
+    inset 0 -8px 14px rgba(34,39,32,.10),
+    0 10px 22px var(--shadow);
+  text-align:center;
+  backdrop-filter: blur(1px);
+}
+label{display:block;margin:15px 0 6px;color:var(--gold-soft)}
+input,textarea,button{
+  font:inherit;font-size:18px;color:#f4e4c8;
+  border:1px solid rgba(213,188,147,.82);
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(84,97,79,.42), rgba(54,64,53,.18)), var(--field);
+  box-shadow: inset 0 1px 0 rgba(255,244,224,.07), inset 0 -5px 9px rgba(0,0,0,.10);
+  padding:13px 14px;width:100%;
+}
+input::placeholder,textarea::placeholder{color:rgba(233,215,186,.68)}
+input{text-align:center}
+textarea{resize:vertical}
+button{
+  cursor:pointer;
+  background:linear-gradient(180deg, #dbc393, #d1b17d);
+  color:#384333;font-weight:bold;
+  text-shadow:0 1px 0 rgba(255,250,238,.45);
+  box-shadow:0 8px 16px rgba(40,33,17,.18), inset 0 1px 0 rgba(255,250,238,.32);
+}
+button.secondary{background:linear-gradient(180deg, #596552, #4c5848);color:var(--gold-soft);text-shadow:none}
+nav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(76,87,73,.97);
+  border-top:1px solid rgba(214,190,149,.82);
+  display:flex;gap:2px;padding:9px 5px calc(9px + env(safe-area-inset-bottom));z-index:5;
+  box-shadow:0 -8px 18px rgba(22,25,20,.16);
+}
+nav button{border:0;background:transparent;color:var(--gold-soft);font-size:12px;padding:8px 2px;font-weight:normal;box-shadow:none;border-radius:18px}
+nav button.active{background:rgba(132,145,120,.55)}
+.big{font-size:35px;margin:8px 0;color:var(--gold-soft);text-shadow:0 1px 0 rgba(255,245,224,.12),0 2px 4px rgba(0,0,0,.18)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid .panel{margin:5px 0;padding:15px 8px}
+.pos{color:#dce7af}.neg{color:#f1b2a0}.small{font-size:13px;opacity:.9}
+section[hidden]{display:none}.entry{text-align:left}.entry strong{float:right}svg{width:100%;height:auto}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.day{border:1px solid #8f9986;border-radius:8px;min-height:48px;padding:4px 1px;font-size:11px;text-align:center;background:rgba(72,82,69,.38)}.day b{display:block;font-size:10px;margin-top:4px}
+.row{display:flex;gap:8px;align-items:center}.row button{width:auto}
+#msg,#status{min-height:20px;color:#ffe0be}
+#balance{letter-spacing:.4px}
+#form>.panel:first-of-type .big,#form .panel .big{line-height:1.1}
+</style><main><header><img src="ornament.jpg" alt="Османский растительный орнамент"><h1>TRADING JOURNAL</h1></header><div class="orn">◇</div><section id="trade"><div class="panel">Баланс до сделки<div class="big" id="balance">—</div><div id="setup"><label for="initial">Стартовый баланс ($)</label><input id="initial" inputmode="decimal" placeholder="5000"><button id="init" style="margin-top:10px">Установить баланс</button></div></div><form id="form"><label for="rr">R/R (1 : X)</label><input id="rr" inputmode="decimal" value="2,9" placeholder="2,9" required><label for="after">Баланс после сделки ($)</label><input id="after" inputmode="decimal" placeholder="0,00" required><div class="grid"><div class="panel">Риск<div class="big" id="riskPct">—</div><div id="risk">—</div></div><div class="panel">Результат<div class="big" id="pnlPct">—</div><div id="pnl">—</div></div></div><label for="note">Заметка о сделке</label><textarea id="note" rows="2" placeholder="Необязательно"></textarea><p id="msg" role="status"></p><button type="submit">Сохранить сделку</button></form><p class="small">Комиссия включена в баланс. Риск оценивается по полному тейку или стопу; при частичном закрытии оценка может быть неточной.</p></section><section id="history" hidden><h2>История сделок</h2><div id="entries"></div></section><section id="calendar" hidden><h2>Календарь доходности</h2><div class="row"><button id="prev">‹</button><span id="month" style="flex:1;text-align:center"></span><button id="next">›</button></div><div class="days" id="days"></div></section><section id="stats" hidden><h2>Статистика</h2><div class="grid" id="metrics"></div><div class="panel"><svg id="chart" viewBox="0 0 320 150" aria-label="График баланса"></svg></div></section><section id="settings" hidden><h2>Настройки</h2><p>Данные сохраняются только в этом браузере. Регулярно делай резервную копию.</p><button id="export">Скачать резервную копию</button><label for="import">Восстановить из файла</label><input type="file" id="import" accept="application/json"><p id="status" role="status"></p><button class="secondary" id="reset">Удалить все данные</button></section></main><nav><button data-tab="trade" class="active">Сделка</button><button data-tab="history">История</button><button data-tab="calendar">Календарь</button><button data-tab="stats">Статистика</button><button data-tab="settings">Настройки</button></nav><script>
 const $=id=>document.getElementById(id), key='trading-journal-v1', empty=()=>({initial:null,trades:[]});let data=empty();try{let s=localStorage.getItem(key);if(s)data=JSON.parse(s)}catch(e){}const num=s=>s.trim()===''?NaN:Number(s.trim().replace(/\s/g,'').replace(',','.')),money=n=>n.toLocaleString('en-US',{style:'currency',currency:'USD'}),pct=n=>n.toFixed(2)+'%',balance=()=>data.trades.length?data.trades.at(-1).after:data.initial,esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));function save(next){try{localStorage.setItem(key,JSON.stringify(next));data=next;return true}catch(e){alert('Не удалось сохранить данные. Проверь настройки браузера.');return false}}function calc(){let b=balance(),a=num($('after').value),r=num($('rr').value);if(!Number.isFinite(b)||b<=0||!Number.isFinite(a)||a<0||!Number.isFinite(r)||r<=0)return null;let pnl=a-b;return {before:b,after:a,rr:r,pnl,risk:pnl>0?pnl/r:pnl<0?-pnl:null}}function preview(){let t=calc();$('risk').textContent=t&&t.risk!==null?money(t.risk):'—';$('riskPct').textContent=t&&t.risk!==null?pct(t.risk/t.before*100):'—';$('pnl').textContent=t?money(t.pnl):'—';$('pnlPct').textContent=t?pct(t.pnl/t.before*100):'—';$('pnlPct').className='big '+(t&&t.pnl<0?'neg':'pos')}
-$('init').onclick=()=>{let n=num($('initial').value);if(n>0&&Number.isFinite(n)&&save({initial:n,trades:[]}))render();else if(!(n>0))alert('Введите положительный баланс')};$('form').oninput=preview;$('form').onsubmit=e=>{e.preventDefault();let t=calc();if(!t){$('msg').textContent='Проверь баланс и R/R';return}let now=new Date(),date=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');if(save({...data,trades:[...data.trades,{...t,date,note:$('note').value}]})){$('form').reset();$('msg').textContent='Сделка сохранена';render()}};let month=new Date();function calendar(){let y=month.getFullYear(),m=month.getMonth();$('month').textContent=month.toLocaleDateString('ru',{month:'long',year:'numeric'});let out=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>`<div class="small">${d}</div>`);for(let i=0;i<(new Date(y,m,1).getDay()+6)%7;i++)out.push('<div></div>');for(let d=1;d<=new Date(y,m+1,0).getDate();d++){let date=[y,String(m+1).padStart(2,'0'),String(d).padStart(2,'0')].join('-'),ts=data.trades.filter(t=>t.date===date),p=ts.reduce((s,t)=>s+t.pnl,0);out.push(`<div class="day">${d}${ts.length?`<b class="${p<0?'neg':'pos'}">${money(p)}</b>`:''}</div>`)}$('days').innerHTML=out.join('')}$('prev').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);calendar()};$('next').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);calendar()};function render(){let b=balance(),ts=data.trades,n=ts.length,p=ts.reduce((s,t)=>s+t.pnl,0);$('balance').textContent=b===null?'—':money(b);$('setup').hidden=data.initial!==null;$('entries').innerHTML=n?[...ts].reverse().map((t,i)=>`<div class="panel entry">${esc(t.date)} <strong class="${t.pnl<0?'neg':'pos'}">${money(t.pnl)}</strong><p>№${n-i} · R/R 1:${t.rr}</p><p>${money(t.before)} → ${money(t.after)}</p><div class="small">Риск: ${t.risk===null?'—':money(t.risk)} · ${pct(t.pnl/t.before*100)}</div><p>${esc(t.note||'')}</p></div>`).join(''):'<p>Пока нет сделок</p>';$('metrics').innerHTML=[['Сделок',n],['Win rate',n?pct(ts.filter(t=>t.pnl>0).length/n*100):'—'],['Чистый P&L',money(p)],['Доходность',data.initial?pct(p/data.initial*100):'—'],['Прибыльных',ts.filter(t=>t.pnl>0).length],['Убыточных',ts.filter(t=>t.pnl<0).length]].map(([k,v])=>`<div class="panel">${k}<p>${v}</p></div>`).join('');let vals=data.initial===null?[]:[data.initial,...ts.map(t=>t.after)],lo=Math.min(...vals),hi=Math.max(...vals);$('chart').innerHTML=vals.length>1?`<polyline fill="none" stroke="#d9ba83" stroke-width="2.5" points="${vals.map((v,i)=>`${10+300*i/(vals.length-1)},${135-120*(v-lo)/(hi-lo||1)}`).join(' ')}"/>`:'<text x="160" y="75" text-anchor="middle" fill="#ead0a1" font-size="14">График появится после сделки</text>';calendar();preview()}
+$('init').onclick=()=>{let n=num($('initial').value);if(n>0&&Number.isFinite(n)&&save({initial:n,trades:[]}))render();else if(!(n>0))alert('Введите положительный баланс')};$('form').oninput=preview;$('form').onsubmit=e=>{e.preventDefault();let t=calc();if(!t){$('msg').textContent='Проверь баланс и R/R';return}let now=new Date(),date=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');if(save({...data,trades:[...data.trades,{...t,date,note:$('note').value}]})){$('form').reset();$('rr').value='2,9';$('msg').textContent='Сделка сохранена';render()}};let month=new Date();function calendar(){let y=month.getFullYear(),m=month.getMonth();$('month').textContent=month.toLocaleDateString('ru',{month:'long',year:'numeric'});let out=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>`<div class="small">${d}</div>`);for(let i=0;i<(new Date(y,m,1).getDay()+6)%7;i++)out.push('<div></div>');for(let d=1;d<=new Date(y,m+1,0).getDate();d++){let date=[y,String(m+1).padStart(2,'0'),String(d).padStart(2,'0')].join('-'),ts=data.trades.filter(t=>t.date===date),p=ts.reduce((s,t)=>s+t.pnl,0);out.push(`<div class="day">${d}${ts.length?`<b class="${p<0?'neg':'pos'}">${money(p)}</b>`:''}</div>`)}$('days').innerHTML=out.join('')}$('prev').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()-1,1);calendar()};$('next').onclick=()=>{month=new Date(month.getFullYear(),month.getMonth()+1,1);calendar()};function render(){let b=balance(),ts=data.trades,n=ts.length,p=ts.reduce((s,t)=>s+t.pnl,0);$('balance').textContent=b===null?'—':money(b);$('setup').hidden=data.initial!==null;$('entries').innerHTML=n?[...ts].reverse().map((t,i)=>`<div class="panel entry">${esc(t.date)} <strong class="${t.pnl<0?'neg':'pos'}">${money(t.pnl)}</strong><p>№${n-i} · R/R 1:${t.rr}</p><p>${money(t.before)} → ${money(t.after)}</p><div class="small">Риск: ${t.risk===null?'—':money(t.risk)} · ${t.risk===null?'—':pct(t.risk/t.before*100)}</div><p>${esc(t.note||'')}</p></div>`).join(''):'<p>Пока нет сделок</p>';$('metrics').innerHTML=[['Сделок',n],['Win rate',n?pct(ts.filter(t=>t.pnl>0).length/n*100):'—'],['Чистый P&L',money(p)],['Доходность',data.initial?pct(p/data.initial*100):'—'],['Прибыльных',ts.filter(t=>t.pnl>0).length],['Убыточных',ts.filter(t=>t.pnl<0).length]].map(([k,v])=>`<div class="panel">${k}<p>${v}</p></div>`).join('');let vals=data.initial===null?[]:[data.initial,...ts.map(t=>t.after)],lo=Math.min(...vals),hi=Math.max(...vals);$('chart').innerHTML=vals.length>1?`<polyline fill="none" stroke="#d8c198" stroke-width="2.5" points="${vals.map((v,i)=>`${10+300*i/(vals.length-1)},${135-120*(v-lo)/(hi-lo||1)}`).join(' ')}"/>`:'<text x="160" y="75" text-anchor="middle" fill="#ead0a1" font-size="14">График появится после сделки</text>';calendar();preview()}
 document.querySelectorAll('nav button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('main section').forEach(s=>s.hidden=s.id!==btn.dataset.tab);document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===btn));render()});$('export').onclick=()=>{let u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download='trading-journal-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)};$('import').onchange=async e=>{try{let d=JSON.parse(await e.target.files[0].text());if(!d||!Array.isArray(d.trades)||!(d.initial===null||Number.isFinite(d.initial)&&d.initial>0))throw 0;let b=d.initial;for(let t of d.trades){if(!(b>0&&t.before===b&&Number.isFinite(t.after)&&t.after>=0&&Number.isFinite(t.rr)&&t.rr>0&&typeof t.date==='string'))throw 0;t.pnl=t.after-b;t.risk=t.pnl>0?t.pnl/t.rr:t.pnl<0?-t.pnl:null;b=t.after}if(confirm('Заменить текущие данные резервной копией?')&&save(d)){render();$('status').textContent='Данные восстановлены'}}catch(e){$('status').textContent='Некорректный файл'} };$('reset').onclick=()=>{if(confirm('Удалить все сделки и баланс без возможности отмены?')&&save(empty()))render()};render();if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></html>
